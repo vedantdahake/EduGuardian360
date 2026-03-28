@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - EduGuardian360</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <div class="login-wrapper">
+    <div class="card login-card">
+      
+      <div class="logo-title">
+        <i class="fa-solid fa-shield-halved" style="color: var(--primary-orange);"></i>
+        EduGuardian360
+      </div>
+
+      <p style="text-align: center; color: var(--text-light); margin-bottom: 24px; font-size: 14px;">
+        Parent Portal Login
+      </p>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="rfid">RFID Tag Number</label>
+          <input type="text" id="rfid" placeholder="e.g. FAA9D605" required autocomplete="off">
+        </div>
+        
+        <div class="form-group">
+          <label for="parentName">Parent Name</label>
+          <input type="text" id="parentName" placeholder="e.g. Mr Sharma" required autocomplete="off">
+        </div>
+
+        <div id="errorMessage" style="color: var(--red); font-size: 13px; text-align: center; margin-bottom: 12px; display: none;">
+          Invalid credentials.
+        </div>
+
+        <button type="submit" class="btn btn-blue" style="width: 100%; padding: 12px; font-size: 15px;">
+          Login to Dashboard
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <script src="js/login.js"></script>
+</body>
+</html>

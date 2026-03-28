@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - EduGuardian360</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Leaflet CSS for Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+
+    <!-- Top Navigation -->
+    <div class="header">
+        <div class="logo-title" style="margin: 0; font-size: 20px;">
+            <i class="fa-solid fa-shield-halved" style="color: var(--primary-orange);"></i>
+            EduGuardian360
+        </div>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <span style="font-size: 14px; color: var(--text-dark); font-weight: 500;" id="welcomeMessage">Welcome, Parent</span>
+            <button class="btn btn-orange" id="logoutBtn">Logout</button>
+        </div>
+    </div>
+
+    <div class="container" style="padding-top: 30px;">
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" id="tab-dashboard" onclick="switchTab('dashboard')">
+                <i class="fa-solid fa-gauge"></i> Dashboard
+            </button>
+            <button class="tab inactive" id="tab-contacts" onclick="switchTab('contacts')">
+                <i class="fa-solid fa-address-book"></i> Contacts
+            </button>
+        </div>
+
+        <!-- Dashboard View -->
+        <div id="view-dashboard" class="grid-dashboard">
+            
+            <!-- Left Column: Profile & Alerts -->
+            <div class="flex-col gap-4" style="display: flex;">
+                
+                <!-- Profile Card -->
+                <div class="card profile-card">
+                    <div class="profile-img">
+                        <i class="fa-solid fa-user-graduate" style="color: var(--primary-blue)"></i>
+                    </div>
+                    <h3 id="childNameTitle" style="margin-bottom: 4px;">Loading...</h3>
+                    <div class="info-row">
+                        <i class="fa-solid fa-id-card"></i> <span id="rfidDisplay">RFID</span>
+                    </div>
+                    <div class="info-row">
+                        <i class="fa-solid fa-bus"></i> <span id="busDisplay">Bus: --</span>
+                    </div>
+                </div>
+
+                <!-- Alerts Card -->
+                <div class="card">
+                    <div style="display: flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 12px;">
+                        <i class="fa-regular fa-bell" style="color: var(--primary-orange);"></i>
+                        Alerts
+                    </div>
+                    <div id="alertsContainer">
+                        <div class="card alert-card" style="margin-bottom: 0; padding: 12px; font-size: 14px;">
+                            <i class="fa-solid fa-check-circle" style="color: var(--green);"></i> No active alerts. Everything is normal.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Status & Map -->
+            <div class="flex-col gap-4" style="display: flex;">
+                
+                <!-- Status Card -->
+                <div class="card">
+                    <div class="status-title">Today's Status</div>
+                    <div class="status-item">
+                        <div class="status-indicator status-gray" id="boardedStatusCol"></div>
+                        <div style="flex: 1; font-size: 14px;">
+                            <strong>Boarded:</strong> <span id="boardedStatusText">Not yet</span>
+                        </div>
+                    </div>
+                    <div class="status-item" style="margin-bottom: 0;">
+                        <div class="status-indicator status-gray" id="droppedStatusCol"></div>
+                        <div style="flex: 1; font-size: 14px;">
+                            <strong>Dropped:</strong> <span id="droppedStatusText">Not yet</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Map Card -->
+                <div class="card" style="padding: 10px;">
+                    <div id="map"></div>
+                    <div style="text-align: right; font-size: 12px; color: var(--text-light); margin-top: 8px;">
+                        Live GPS tracking simulation | Leaflet.js
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Contacts View -->
+        <div id="view-contacts" style="display: none;">
+            <h2 style="font-size: 20px; margin-bottom: 20px; font-weight: 600;">School Directory & Emergency Contacts</h2>
+            
+            <div class="contacts-grid">
+                
+                <!-- Class Teacher -->
+                <div class="card contact-card">
+                    <div class="contact-details">
+                        <div class="contact-role">Class Teacher</div>
+                        <div class="contact-name">Ms. Naina Parmar</div>
+                        <div class="contact-phone"><i class="fa-solid fa-phone"></i> +91 9869756921</div>
+                        <div class="contact-actions">
+                            <button class="btn btn-orange"><i class="fa-solid fa-phone-alt"></i> Call</button>
+                            <button class="btn btn-outline">Message</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Principal -->
+                <div class="card contact-card">
+                    <div class="contact-details">
+                        <div class="contact-role">Principal</div>
+                        <div class="contact-name">Mr. Ashok Joshi</div>
+                        <div class="contact-phone"><i class="fa-solid fa-phone"></i> +91 8887793957</div>
+                        <div class="contact-actions">
+                            <button class="btn btn-orange"><i class="fa-solid fa-phone-alt"></i> Call</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bus Driver (Dynamic) -->
+                <div class="card contact-card orange">
+                    <div class="contact-details">
+                        <div class="contact-role">Bus Driver</div>
+                        <div class="contact-name" id="driverNameTitle">Loading...</div>
+                        <div class="contact-phone"><i class="fa-solid fa-phone"></i> <span id="driverPhoneSpan">--</span></div>
+                        <div class="contact-actions">
+                            <button class="btn btn-orange"><i class="fa-solid fa-phone-alt"></i> Call</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ambulance -->
+                <div class="card contact-card red">
+                    <div class="contact-details">
+                        <div class="contact-role">Ambulance Service</div>
+                        <div class="contact-name">Emergency Ambulance</div>
+                        <div class="contact-phone"><i class="fa-solid fa-phone"></i> 102</div>
+                        <div class="contact-actions">
+                            <button class="btn btn-red" style="background-color: var(--red); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+                                Call Emergency
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/dashboard.js"></script>
+
+</body>
+</html>
