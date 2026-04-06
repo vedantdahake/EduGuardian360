@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EduGuardian360 – Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0d14;
+      --surface:   #111827;
+      --surface2:  #1a2235;
+      --border:    #1f2d45;
+      --accent:    #3b82f6;
+      --accent2:   #6366f1;
+      --danger:    #ef4444;
+      --success:   #22c55e;
+      --warning:   #f59e0b;
+      --text:      #f1f5f9;
+      --muted:     #64748b;
+      --radius:    14px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ======= HEADER ======= */
+    header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+    .logo-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+    header h1 { font-size: 1.25rem; font-weight: 700; }
+    header span { font-size: 0.8rem; background: rgba(99,102,241,0.2); color: #a5b4fc; padding: 3px 10px; border-radius: 20px; border: 1px solid rgba(99,102,241,0.3); margin-left: auto; }
+
+    /* ======= LAYOUT ======= */
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      display: grid;
+      gap: 28px;
+    }
+
+    /* ======= CARD ======= */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: box-shadow 0.3s;
+    }
+    .card:hover { box-shadow: 0 0 0 1px rgba(99,102,241,0.3), 0 20px 40px rgba(0,0,0,0.4); }
+
+    .card-header {
+      padding: 22px 28px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface2);
+    }
+    .card-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .icon-blue  { background: rgba(59,130,246,0.15); }
+    .icon-red   { background: rgba(239,68,68,0.15); }
+    .icon-green { background: rgba(34,197,94,0.15); }
+
+    .card-header h2 { font-size: 1.05rem; font-weight: 700; }
+    .card-header p  { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+
+    .card-body { padding: 28px; }
+
+    /* ======= FORM ======= */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 9px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+    }
+    input::placeholder { color: #374151; }
+
+    /* ======= BUTTON ======= */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 9px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
+    .btn-primary:hover { opacity: 0.9; box-shadow: 0 4px 20px rgba(59,130,246,0.4); }
+    .btn-success { background: linear-gradient(135deg, #16a34a, #15803d); color: #fff; }
+    .btn-success:hover { opacity: 0.9; box-shadow: 0 4px 20px rgba(22,163,74,0.4); }
+
+    .form-footer {
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* ======= TOAST ======= */
+    #toast-container {
+      position: fixed;
+      bottom: 28px; right: 28px;
+      display: flex; flex-direction: column; gap: 10px;
+      z-index: 9999;
+    }
+    .toast {
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      backdrop-filter: blur(10px);
+      border: 1px solid;
+      animation: slideIn 0.3s ease, fadeOut 0.4s ease 2.8s forwards;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 320px;
+    }
+    .toast-success { background: rgba(22,163,74,0.15); border-color: rgba(34,197,94,0.3); color: #86efac; }
+    .toast-error   { background: rgba(239,68,68,0.15);  border-color: rgba(239,68,68,0.3);  color: #fca5a5; }
+    @keyframes slideIn  { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes fadeOut  { to { opacity: 0; transform: translateX(100%); } }
+
+    /* ======= SOS TABLE ======= */
+    .sos-toolbar {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px;
+    }
+    .sos-toolbar h3 { font-size: 0.9rem; color: var(--muted); }
+    .btn-sm {
+      padding: 8px 16px;
+      font-size: 0.8rem;
+      border-radius: 7px;
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--text);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+    .table-wrap { overflow-x: auto; border-radius: 10px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    thead tr { background: var(--surface2); }
+    th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    td { padding: 13px 16px; border-top: 1px solid var(--border); vertical-align: middle; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .badge-active  { background: rgba(239,68,68,0.15);  color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+    .badge-passive { background: rgba(100,116,139,0.15); color: #94a3b8; border: 1px solid rgba(100,116,139,0.3); }
+
+    .dot { width: 7px; height: 7px; border-radius: 50%; }
+    .dot-active  { background: #ef4444; animation: pulse 1.5s infinite; }
+    .dot-passive { background: #64748b; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+    .btn-toggle {
+      padding: 6px 14px;
+      font-size: 0.78rem;
+      border-radius: 6px;
+      font-family: inherit;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      border: 1.5px solid;
+    }
+    .btn-toggle-deactivate { border-color: rgba(239,68,68,0.4); color: #f87171; background: rgba(239,68,68,0.08); }
+    .btn-toggle-deactivate:hover { background: rgba(239,68,68,0.2); }
+    .btn-toggle-activate { border-color: rgba(34,197,94,0.4); color: #4ade80; background: rgba(34,197,94,0.08); }
+    .btn-toggle-activate:hover { background: rgba(34,197,94,0.2); }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+    }
+    .empty-state .es-icon { font-size: 36px; margin-bottom: 12px; }
+    .empty-state p { font-size: 0.9rem; }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.2);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    .spinner.active { display: block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    input[type="tel"] { -moz-appearance: textfield; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-icon">🛡️</div>
+  <div>
+    <h1>EduGuardian360</h1>
+  </div>
+  <span>Admin Panel</span>
+</header>
+
+<main>
+
+  <!-- ===== SECTION 1: ADD STUDENT ===== -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-blue">🎓</div>
+      <div>
+        <h2>Add New Student</h2>
+        <p>Register a student's RFID card to the database</p>
+      </div>
+    </div>
+    <div class="card-body">
+      <form id="addStudentForm">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="st-rfid">RFID Tag UID</label>
+            <input id="st-rfid" type="text" placeholder="e.g. FAA9D605" maxlength="20" required />
+          </div>
+          <div class="form-group">
+            <label for="st-bus">Bus ID</label>
+            <input id="st-bus" type="text" placeholder="e.g. bus_01" required />
+          </div>
+          <div class="form-group">
+            <label for="st-name">Student Name</label>
+            <input id="st-name" type="text" placeholder="e.g. Naman Sharma" required />
+          </div>
+          <div class="form-group">
+            <label for="st-parent">Parent Name</label>
+            <input id="st-parent" type="text" placeholder="e.g. Mr Sharma" required />
+          </div>
+        </div>
+        <div class="form-footer">
+          <button class="btn btn-primary" type="submit" id="addStudentBtn">
+            <span>➕</span> Add Student
+          </button>
+          <div class="spinner" id="spinner-student"></div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== SECTION 2: SOS ALERTS ===== -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-red">🚨</div>
+      <div>
+        <h2>SOS Alert Management</h2>
+        <p>View and manage active emergency alerts</p>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="sos-toolbar">
+        <h3 id="sos-count">Loading alerts…</h3>
+        <button class="btn btn-outline btn-sm" onclick="loadSOS()">🔄 Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Bus ID</th>
+              <th>Message</th>
+              <th>Time</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="sos-table-body">
+            <tr><td colspan="5"><div class="empty-state"><div class="es-icon">⏳</div><p>Loading…</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SECTION 3: ADD BUS DRIVER ===== -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-green">🚌</div>
+      <div>
+        <h2>Add / Update Bus Driver</h2>
+        <p>Register or overwrite driver information for a bus</p>
+      </div>
+    </div>
+    <div class="card-body">
+      <form id="addBusForm">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="bus-id">Bus ID</label>
+            <input id="bus-id" type="text" placeholder="e.g. bus_01" required />
+          </div>
+          <div class="form-group">
+            <label for="bus-number">Bus Number</label>
+            <input id="bus-number" type="text" placeholder="e.g. MH12AB1234" required />
+          </div>
+          <div class="form-group">
+            <label for="driver-name">Driver Name</label>
+            <input id="driver-name" type="text" placeholder="e.g. Ramesh Yadav" required />
+          </div>
+          <div class="form-group">
+            <label for="driver-phone">Driver Phone</label>
+            <input id="driver-phone" type="tel" placeholder="e.g. 9876543210" required />
+          </div>
+        </div>
+        <div class="form-footer">
+          <button class="btn btn-success" type="submit" id="addBusBtn">
+            <span>💾</span> Save Bus Info
+          </button>
+          <div class="spinner" id="spinner-bus"></div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</main>
+
+<div id="toast-container"></div>
+
+<script>
+  const API = "http://localhost:3000";
+
+  // ===== TOAST =====
+  function showToast(message, type = "success") {
+    const container = document.getElementById("toast-container");
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `<span>${type === "success" ? "✅" : "❌"}</span> ${message}`;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3200);
+  }
+
+  // ===== ADD STUDENT =====
+  document.getElementById("addStudentForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById("addStudentBtn");
+    const spinner = document.getElementById("spinner-student");
+
+    const body = {
+      rfid:        document.getElementById("st-rfid").value.trim().toUpperCase(),
+      child_name:  document.getElementById("st-name").value.trim(),
+      parent_name: document.getElementById("st-parent").value.trim(),
+      bus_id:      document.getElementById("st-bus").value.trim()
+    };
+
+    btn.disabled = true;
+    spinner.classList.add("active");
+    try {
+      const res  = await fetch(`${API}/admin/add-student`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed");
+      showToast(`Student "${body.child_name}" added successfully!`);
+      e.target.reset();
+    } catch (err) {
+      showToast(err.message, "error");
+    } finally {
+      btn.disabled = false;
+      spinner.classList.remove("active");
+    }
+  });
+
+  // ===== LOAD SOS =====
+  async function loadSOS() {
+    const tbody = document.getElementById("sos-table-body");
+    const countEl = document.getElementById("sos-count");
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><p>⏳ Loading…</p></div></td></tr>`;
+
+    try {
+      // Fetch all SOS (we load both active and passive by fetching all)
+      const res = await fetch(`${API}/sos`);
+      let alerts = await res.json();
+
+      // also fetch history for bus_01 to show all
+      const histRes = await fetch(`${API}/sos/history/bus_01`);
+      if (histRes.ok) {
+        const hist = await histRes.json();
+        // merge, deduplicate by _id
+        const map = {};
+        [...alerts, ...hist].forEach(a => map[a._id] = a);
+        alerts = Object.values(map);
+      }
+
+      // Sort newest first
+      alerts.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+      countEl.textContent = `${alerts.length} alert${alerts.length !== 1 ? "s" : ""} found`;
+
+      if (!alerts.length) {
+        tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="es-icon">✅</div><p>No SOS alerts found.</p></div></td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = alerts.map(a => {
+        const isActive = a.status === "active";
+        const badge = isActive
+          ? `<span class="badge badge-active"><span class="dot dot-active"></span> Active</span>`
+          : `<span class="badge badge-passive"><span class="dot dot-passive"></span> Passive</span>`;
+        const btnLabel = isActive ? "Mark Passive" : "Mark Active";
+        const btnClass = isActive ? "btn-toggle-deactivate" : "btn-toggle-activate";
+        const newStatus = isActive ? "passive" : "active";
+        return `
+          <tr id="row-${a._id}">
+            <td><strong>${a.bus_id || "—"}</strong></td>
+            <td>${a.message || "Emergency Button Pressed"}</td>
+            <td style="color:var(--muted);font-size:0.82rem">${a.time || "—"}</td>
+            <td>${badge}</td>
+            <td>
+              <button class="btn-toggle ${btnClass}" onclick="toggleSOS('${a._id}', '${newStatus}')">
+                ${btnLabel}
+              </button>
+            </td>
+          </tr>`;
+      }).join("");
+    } catch (err) {
+      countEl.textContent = "Error loading alerts";
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="es-icon">❌</div><p>${err.message}</p></div></td></tr>`;
+    }
+  }
+
+  // ===== TOGGLE SOS =====
+  async function toggleSOS(id, newStatus) {
+    try {
+      const res = await fetch(`${API}/admin/sos/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed");
+      showToast(`SOS marked as ${newStatus}`);
+      loadSOS(); // refresh table
+    } catch (err) {
+      showToast(err.message, "error");
+    }
+  }
+
+  // ===== ADD BUS =====
+  document.getElementById("addBusForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById("addBusBtn");
+    const spinner = document.getElementById("spinner-bus");
+
+    const body = {
+      bus_id:       document.getElementById("bus-id").value.trim(),
+      bus_number:   document.getElementById("bus-number").value.trim().toUpperCase(),
+      driver_name:  document.getElementById("driver-name").value.trim(),
+      driver_phone: document.getElementById("driver-phone").value.trim()
+    };
+
+    btn.disabled = true;
+    spinner.classList.add("active");
+    try {
+      const res  = await fetch(`${API}/admin/add-bus`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed");
+      showToast(`Bus "${body.bus_id}" info saved!`);
+      e.target.reset();
+    } catch (err) {
+      showToast(err.message, "error");
+    } finally {
+      btn.disabled = false;
+      spinner.classList.remove("active");
+    }
+  });
+
+  // ===== INIT =====
+  loadSOS();
+</script>
+
+</body>
+</html>

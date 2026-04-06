@@ -316,3 +316,67 @@ app.get("/attendance", async (req, res) => {
     res.json({ error: err.message });
   }
 });
+
+
+// ================ ADMIN ROUTES ================
+
+// ---------------- ADMIN: ADD STUDENT ----------------
+
+app.post("/admin/add-student", async (req, res) => {
+  try {
+    const { rfid, child_name, parent_name, bus_id } = req.body;
+    if (!rfid || !child_name || !parent_name || !bus_id) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+    const existing = await User.findOne({ rfid });
+    if (existing) {
+      return res.status(409).json({ error: "RFID already registered" });
+    }
+    const user = new User({ rfid: rfid.toUpperCase(), child_name, parent_name, bus_id });
+    await user.save();
+    res.json({ message: "Student added successfully ✅", user });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+// ---------------- ADMIN: ADD BUS ----------------
+
+app.post("/admin/add-bus", async (req, res) => {
+  try {
+    const { bus_id, bus_number, driver_name, driver_phone } = req.body;
+    if (!bus_id || !bus_number || !driver_name || !driver_phone) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+    await Bus.updateOne(
+      { bus_id },
+      { bus_id, bus_number, driver_name, driver_phone },
+      { upsert: true }
+    );
+    res.json({ message: "Bus info saved successfully ✅", bus_id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+// ---------------- ADMIN: UPDATE SOS STATUS ----------------
+
+app.patch("/admin/sos/:id", async (req, res) => {
+  try {
+    const { status } = req.body;
+    if (!["active", "passive"].includes(status)) {
+      return res.status(400).json({ error: "Status must be 'active' or 'passive'" });
+    }
+    const updated = await SOS.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+    if (!updated) return res.status(404).json({ error: "SOS alert not found" });
+    res.json({ message: `SOS marked as ${status} ✅`, alert: updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
