@@ -28,6 +28,18 @@ Adafruit_SH1106G display(128, 64, &Wire);
 bool emergencyActive = false;
 unsigned long emergencyStart = 0;
 
+volatile bool buttonPressedFlag = false;
+volatile unsigned long lastInterruptTime = 0;
+
+void IRAM_ATTR handleButtonInterrupt() {
+  unsigned long interruptTime = millis();
+  // 200ms debounce filter in hardware interrupt
+  if (interruptTime - lastInterruptTime > 200) {
+    buttonPressedFlag = true;
+    lastInterruptTime = interruptTime;
+  }
+}
+
 // ===== GPS =====
 unsigned long lastGpsFetch = 0;
 const unsigned long gpsInterval = 5000; // Fetch GPS every 5 seconds
@@ -95,6 +107,7 @@ void setup() {
   rfid.PCD_SetAntennaGain(rfid.RxGain_max);
 
   pinMode(SOS_BUTTON, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(SOS_BUTTON), handleButtonInterrupt, FALLING);
 
   Wire.begin(21, 4);
 
@@ -118,9 +131,27 @@ void setup() {
 // ===== LOOP =====
 void loop() {
   
-  // 🔴 BUTTON DEBUG
-  if (digitalRead(SOS_BUTTON) == LOW) {
-    Serial.println("BUTTON PRESSED");
+  // 🔴 BUTTON LOGIC (Hardware Interrupt)
+  if (buttonPressedFlag) {
+    buttonPressedFlag = false; // Reset the flag immediately
+    Serial.println("BUTTON PRESSED (Interrupt)");
+
+    if (!emergencyActive) {
+      emergencyActive = true;
+      emergencyStart = millis();
+      showEmergency();
+      
+      // SEND SOS TO BACKEND
+      if (WiFi.status() == WL_CONNECTED) {
+        HTTPClient http;
+        String sosPath = serverName + "/sos/bus_01";
+        http.begin(sosPath.c_str());
+        int responseCode = http.GET();
+        Serial.print("SOS Sent. HTTP Code: "); 
+        Serial.println(responseCode);
+        http.end();
+      }
+    }
   }
 
   // 📡 ARTIFICIAL GPS FETCH
@@ -158,26 +189,8 @@ void loop() {
     http.end();
   }
 
-  // 🔴 SOS LOGIC
-  if (digitalRead(SOS_BUTTON) == LOW && !emergencyActive) {
-    emergencyActive = true;
-    emergencyStart = millis();
-    showEmergency();
-    
-    // SEND SOS TO BACKEND
-    if (WiFi.status() == WL_CONNECTED) {
-      HTTPClient http;
-      String sosPath = serverName + "/sos/bus_01";
-      http.begin(sosPath.c_str());
-      int responseCode = http.GET();
-      Serial.print("SOS Sent. HTTP Code: "); 
-      Serial.println(responseCode);
-      http.end();
-    }
-  }
-
   if (emergencyActive) {
-    if (millis() - emergencyStart >= 60000) {
+    if (millis() - emergencyStart >= 5000) {
       emergencyActive = false;
       showDefault();
     }
