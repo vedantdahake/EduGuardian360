@@ -1,0 +1,54 @@
+Title: EduGuardian360 - Smart School Bus Tracking & Child Safety System
+
+*Introduction:*
+EduGuardian360 is an IoT-based smart school bus tracking and safety system designed to ensure the security of students during their daily commute. Parents are often anxious about their children's whereabouts while traveling to and from school. This project solves that by providing real-time location tracking, automated attendance logging via RFID, and an instant emergency SOS alert system, bridging the communication gap between parents and the school transit system.
+
+*Overview:*
+To build a comprehensive safety system utilizing an ESP32 microcontroller deployed on a school bus. The system integrates an RFID scanner to log when a child boards or de-boards, an OLED screen for immediate visual feedback, a GPS module for real-time tracking, and an SOS button for emergencies. The hardware communicates with a Node.js/MongoDB backend to deliver live data to a web-based parent dashboard.
+
+*Components Required:*
+·       ESP32 Development Board
+·       MFRC522 RFID Reader Module
+·       SH1106 OLED Display (I2C)
+·       Push Button (For SOS functionality)
+·       NEO-6M GPS Module (or Mock Server for testing)
+·       Breadboard & Jumper Wires
+·       Software Stack: Node.js, Express, MongoDB, HTML/CSS/JS
+
+*1. ESP32 Microcontroller:*
+The ESP32 serves as the core processor on the bus. Thanks to its built-in Wi-Fi capabilities, it can collect data from the RFID, GPS, and SOS button and instantly transmit this payload via HTTP requests to the backend server. 
+
+*2. MFRC522 RFID Module:*
+Used to securely track student attendance. Each student is assigned an RFID tag. When boarding or exiting the bus, the student taps their card on the MFRC522 reader. The ESP32 captures the unique ID (UID) and sends it to the server to update the child's status ("IN" or "OUT").
+
+*3. SH1106 OLED Display:*
+Provides on-board visual feedback. It displays system statuses such as "Connecting", "Scan ID", or a customized greeting ("HI ! [Child Name]") upon a successful scan. It also displays an "EMERGENCY" warning when the SOS button is triggered.
+
+*4. GPS Module / Tracking System:*
+The system is designed to periodically fetch location data (latitude and longitude) to monitor the bus's route. In the current iteration, this is handled via a simulated GPS server sending periodic location updates to the backend, which is then visualized on the frontend parent dashboard.
+
+*5. The Backend & Dashboard Platform:*
+A Node.js backend using Express and MongoDB handles all routing and data storage for Users, Buses, Attendance, and SOS alerts. The frontend provides a portal where parents can log in using their child's RFID and their own name to access the dashboard, view the live map, driver details, and any active emergency alerts.
+
+*Circuit & Pin Connections (General Conceptual):*
+- RFID SDA (SS) to ESP32 Pin 5
+- RFID RST to ESP32 Pin 22
+- RFID SCK, MISO, MOSI to ESP32 hardware SPI pins
+- OLED SDA to ESP32 Pin 21
+- OLED SCL to ESP32 Pin 4 (or standard I2C depending on wiring)
+- SOS Button to ESP32 Pin 32 (with Internal Pullup)
+
+*System Working logic:*
+1. **Startup**: The ESP32 initializes all peripherals (SPI for RFID, I2C for OLED) and connects to the specified Wi-Fi network.
+2. **Attendance Mode**: It waits for an RFID card. Once detected, it extracts the UID, sends an HTTP GET request to `/scan-entry/UID`. The backend matches this UID to a database record, toggles their attendance status, and returns the child's name to display on the OLED.
+3. **Live Location Tracking**: Every 5 seconds, a simulated or real GPS payload is fetched and pushed to the `/update-location` backend endpoint, allowing the parent portal's map to update dynamically.
+4. **Emergency Tracking**: If the driver hits the SOS button (Pin 32 goes LOW), the OLED flashes EMERGENCY, and an HTTP alert is fired to `/sos/bus_id`. The backend stores this active alert, and automatically broadcasts the alert to all connected parent dashboards.
+
+*Advantages:*
+*Automated Child Tracking:* Eliminates the need for manual attendance and ensures no child is left behind or gets off at the wrong stop.
+*Peace of Mind:* Gives parents instant, real-time access to the exact geographical location of the school bus.
+*Rapid Response:* The SOS feature allows drivers to instantly notify the school administration and parents of accidents, breakdowns, or emergencies.
+*Cloud Integration:* All data is durably stored in MongoDB for historic tracking and analytics.
+
+*Conclusion:*
+EduGuardian360 effectively demonstrates how affordable IoT hardware and modern web technologies can be combined to drastically improve student safety and transit transparency. It provides a robust, scalable prototype for smart school buses.

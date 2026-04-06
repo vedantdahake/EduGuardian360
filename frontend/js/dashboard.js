@@ -34,24 +34,43 @@ document.addEventListener("DOMContentLoaded", async () => {
 window.switchTab = function(tabName) {
     const btnDashboard = document.getElementById("tab-dashboard");
     const btnContacts = document.getElementById("tab-contacts");
+    const btnSoshistory = document.getElementById("tab-soshistory");
     const viewDashboard = document.getElementById("view-dashboard");
     const viewContacts = document.getElementById("view-contacts");
+    const viewSoshistory = document.getElementById("view-soshistory");
 
     if (tabName === 'dashboard') {
         btnDashboard.className = "tab active";
         btnContacts.className = "tab inactive";
+        if(btnSoshistory) btnSoshistory.className = "tab inactive";
         viewDashboard.style.display = "grid";
         viewContacts.style.display = "none";
+        if(viewSoshistory) viewSoshistory.style.display = "none";
         
         // Fix leaflet map not rendering fully if initialized while hidden
         if (map) {
             setTimeout(() => map.invalidateSize(), 100);
         }
-    } else {
+    } else if (tabName === 'contacts') {
         btnDashboard.className = "tab inactive";
         btnContacts.className = "tab active";
+        if(btnSoshistory) btnSoshistory.className = "tab inactive";
         viewDashboard.style.display = "none";
         viewContacts.style.display = "block";
+        if(viewSoshistory) viewSoshistory.style.display = "none";
+    } else if (tabName === 'soshistory') {
+        btnDashboard.className = "tab inactive";
+        btnContacts.className = "tab inactive";
+        if(btnSoshistory) btnSoshistory.className = "tab active";
+        viewDashboard.style.display = "none";
+        viewContacts.style.display = "none";
+        if(viewSoshistory) viewSoshistory.style.display = "block";
+        
+        // Fetch history data
+        const currentBusId = localStorage.getItem("bus_id");
+        if (currentBusId) {
+            fetchSosHistory(currentBusId);
+        }
     }
 }
 
@@ -106,9 +125,13 @@ async function fetchTrackingData(rfid) {
             let html = '';
             myAlerts.forEach(alert => {
                 html += `
-                <div class="card alert-card danger" style="margin-bottom: 8px; padding: 12px; font-size: 14px;">
-                    <i class="fa-solid fa-triangle-exclamation"></i> 
-                    <strong>SOS ALERT!</strong> ${alert.time}
+                <div class="card alert-card danger" style="margin-bottom: 8px; padding: 12px; font-size: 14px; position:relative;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <i class="fa-solid fa-triangle-exclamation"></i> <strong>SOS ALERT!</strong><br>
+                            <span style="font-size:12px; opacity:0.9">${alert.time}</span>
+                        </div>
+                    </div>
                 </div>`;
             });
             alertsContainer.innerHTML = html;
@@ -148,5 +171,48 @@ function updateMap(lat, lng, status) {
         map.setView([lat, lng]);
         marker.setLatLng([lat, lng]);
         marker.setPopupContent(`<b>Bus Location</b><br/>Status: ${status}`);
+    }
+}
+
+// Fetch SOS History
+async function fetchSosHistory(bus_id) {
+    const container = document.getElementById("sosHistoryContainer");
+    container.innerHTML = `<div class="card" style="padding: 12px; font-size: 14px; color: var(--text-light);">Loading history...</div>`;
+    
+    try {
+        const response = await fetch(`http://localhost:3000/sos/history/${bus_id}`);
+        const data = await response.json();
+        
+        if (data.length === 0) {
+            container.innerHTML = `<div class="card" style="padding: 12px; font-size: 14px; color: var(--text-light);">No SOS records found for this bus.</div>`;
+            return;
+        }
+        
+        let html = '';
+        data.forEach(alert => {
+            const isPassive = alert.status === "passive";
+            const borderStyle = isPassive ? 'border-left: 4px solid var(--text-light);' : 'border-left: 4px solid var(--red);';
+            const statusBadge = isPassive 
+                ? '<span style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-size:11px; float:right; border:1px solid #e2e8f0; color: #64748b; font-weight: 500;">Passive</span>'
+                : '<span style="background:var(--red); color: white; padding:2px 6px; border-radius:4px; font-size:11px; float:right; font-weight: 500;">Active</span>';
+                
+            html += `
+            <div class="card" style="padding: 15px; margin-bottom: 0px; ${borderStyle}">
+                ${statusBadge}
+                <div style="font-weight: 600; margin-bottom:4px;">
+                    ${isPassive ? '<i class="fa-solid fa-clock-rotate-left" style="color:var(--text-light)"></i>' : '<i class="fa-solid fa-triangle-exclamation" style="color:var(--red)"></i>'} 
+                    SOS Trigger
+                </div>
+                <div style="font-size: 13px; color: var(--text-light);">
+                    ${alert.time}
+                </div>
+            </div>`;
+        });
+        
+        container.innerHTML = html;
+        
+    } catch (err) {
+        console.error("Failed to load history", err);
+        container.innerHTML = `<div class="card" style="padding: 12px; font-size: 14px; color: var(--red);">Error loading history.</div>`;
     }
 }

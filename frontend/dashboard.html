@@ -36,6 +36,9 @@
             <button class="tab inactive" id="tab-contacts" onclick="switchTab('contacts')">
                 <i class="fa-solid fa-address-book"></i> Contacts
             </button>
+            <button class="tab inactive" id="tab-soshistory" onclick="switchTab('soshistory')">
+                <i class="fa-solid fa-clock-rotate-left"></i> SOS History
+            </button>
         </div>
 
         <!-- Dashboard View -->
@@ -166,6 +169,16 @@
                     </div>
                 </div>
 
+            </div>
+        </div>
+
+        <!-- SOS History View -->
+        <div id="view-soshistory" style="display: none;">
+            <h2 style="font-size: 20px; margin-bottom: 20px; font-weight: 600;">Emergency Alerts Log</h2>
+            <div id="sosHistoryContainer" class="flex-col gap-4" style="display: flex;">
+                <div class="card" style="padding: 12px; font-size: 14px; color: var(--text-light);">
+                    Loading history...
+                </div>
             </div>
         </div>
 

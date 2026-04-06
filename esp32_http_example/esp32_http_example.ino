@@ -10,8 +10,9 @@
 const char* ssid = "Airtel_sanj_8884";
 const char* password = "Air@79743";
 
-// Replace 192.168.X.X with the IPv4 address of your computer running the Node.js backend
+// Replace 192.168.1.7 with the IPv4 address of your computer
 String serverName = "http://192.168.1.7:3000"; 
+String mockGpsServer = "http://192.168.1.7:4000/gps";
 
 // ===== RFID =====
 #define SS_PIN 5
@@ -26,6 +27,10 @@ Adafruit_SH1106G display(128, 64, &Wire);
 
 bool emergencyActive = false;
 unsigned long emergencyStart = 0;
+
+// ===== GPS =====
+unsigned long lastGpsFetch = 0;
+const unsigned long gpsInterval = 5000; // Fetch GPS every 5 seconds
 
 // ===== CENTER TEXT =====
 void centerText(String text, int y, int size) {
@@ -116,6 +121,41 @@ void loop() {
   // 🔴 BUTTON DEBUG
   if (digitalRead(SOS_BUTTON) == LOW) {
     Serial.println("BUTTON PRESSED");
+  }
+
+  // 📡 ARTIFICIAL GPS FETCH
+  if (WiFi.status() == WL_CONNECTED && millis() - lastGpsFetch >= gpsInterval) {
+    lastGpsFetch = millis();
+    HTTPClient http;
+    http.begin(mockGpsServer.c_str());
+    int responseCode = http.GET();
+    
+    if (responseCode > 0) {
+      String payload = http.getString();
+      
+      // Parse lat and lng (naive text extraction)
+      int latIdx = payload.indexOf("\"lat\":");
+      int lngIdx = payload.indexOf("\"lng\":");
+      
+      if (latIdx > 0 && lngIdx > 0) {
+        int latEnd = payload.indexOf(",", latIdx);
+        int lngEnd = payload.indexOf(",", lngIdx);
+        if (lngEnd == -1) lngEnd = payload.indexOf("}", lngIdx);
+        
+        String latStr = payload.substring(latIdx + 6, latEnd);
+        String lngStr = payload.substring(lngIdx + 6, lngEnd);
+        
+        // Formulate GET to update location
+        String updateUrl = serverName + "/update-location?bus_id=bus_01&lat=" + latStr + "&lng=" + lngStr;
+        Serial.println("Simulating GPS Move: " + updateUrl);
+        
+        HTTPClient updateHttp;
+        updateHttp.begin(updateUrl.c_str());
+        updateHttp.GET();
+        updateHttp.end();
+      }
+    }
+    http.end();
   }
 
   // 🔴 SOS LOGIC
